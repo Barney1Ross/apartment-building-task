@@ -1,20 +1,32 @@
 package com.apartmentbuilding.service;
 
+import java.util.List;
+
 import com.apartmentbuilding.entity.Apartment;
 import com.apartmentbuilding.entity.Building;
 import com.apartmentbuilding.entity.CommonRoom;
 
 public interface BuildingService {
 
-	Building getBuilding(Long id);
+    List<Building> getAllBuildings();
 
-	Building initializeDefaultBuilding();
+    Building getBuilding(Long id);
 
-	Building updateRequestedTemperature(Long id, double newTemp);
+    Building initializeDefaultBuilding();
 
-	Apartment addApartment(Long buildingId, Apartment apartment);
+    Building updateRequestedTemperature(Long buildingId, double newTemp);
 
-	CommonRoom addCommonRoom(Long buildingId, CommonRoom room);
+    Apartment addApartment(Long buildingId, Apartment apartment);
 
-	void updateRoomHeaterCoolerStatus(Building building);
+    CommonRoom addCommonRoom(Long buildingId, CommonRoom room);
+
+    Building removeApartment(Long buildingId, Long apartmentId);
+
+    Building removeCommonRoom(Long buildingId, Long roomId);
+
+    List<Apartment> getApartments(Long buildingId);
+
+    List<CommonRoom> getCommonRooms(Long buildingId);
+
+    void updateRoomHeaterCoolerStatus(Building building);
 }

@@ -1,11 +1,15 @@
 package com.apartmentbuilding.service.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.apartmentbuilding.entity.Apartment;
 import com.apartmentbuilding.entity.Building;
 import com.apartmentbuilding.entity.CommonRoom;
+import com.apartmentbuilding.repository.ApartmentRepository;
 import com.apartmentbuilding.repository.BuildingRepository;
+import com.apartmentbuilding.repository.CommonRoomRepository;
 import com.apartmentbuilding.service.BuildingService;
 
 import lombok.RequiredArgsConstructor;
@@ -15,10 +19,17 @@ import lombok.RequiredArgsConstructor;
 public class BuildingServiceImpl implements BuildingService {
 
     private final BuildingRepository buildingRepo;
+    private final ApartmentRepository apartmentRepo;
+    private final CommonRoomRepository commonRoomRepo;
 
     @Override
     public Building getBuilding(Long id) {
         return buildingRepo.findById(id).orElseThrow();
+    }
+
+    @Override
+    public List<Building> getAllBuildings() {
+        return buildingRepo.findAll();
     }
 
     @Override
@@ -41,6 +52,12 @@ public class BuildingServiceImpl implements BuildingService {
         CommonRoom library = new CommonRoom();
         library.setType(CommonRoom.CommonRoomType.LIBRARY);
 
+        // save rooms first (IDs required)
+        apartmentRepo.save(a101);
+        apartmentRepo.save(a102);
+        commonRoomRepo.save(gym);
+        commonRoomRepo.save(library);
+
         building.getApartments().add(a101);
         building.getApartments().add(a102);
         building.getCommonRooms().add(gym);
@@ -55,32 +72,58 @@ public class BuildingServiceImpl implements BuildingService {
     public Building updateRequestedTemperature(Long id, double newTemp) {
         Building building = getBuilding(id);
         building.setRequestedTemperature(newTemp);
-
         updateRoomHeaterCoolerStatus(building);
-
         return buildingRepo.save(building);
     }
 
     @Override
     public Apartment addApartment(Long buildingId, Apartment apartment) {
         Building building = getBuilding(buildingId);
-        building.getApartments().add(apartment);
+
+        Apartment saved = apartmentRepo.save(apartment);
+        building.getApartments().add(saved);
 
         updateRoomHeaterCoolerStatus(building);
 
         buildingRepo.save(building);
-        return apartment;
+        return saved;
     }
 
     @Override
     public CommonRoom addCommonRoom(Long buildingId, CommonRoom room) {
         Building building = getBuilding(buildingId);
-        building.getCommonRooms().add(room);
+
+        CommonRoom saved = commonRoomRepo.save(room);
+        building.getCommonRooms().add(saved);
 
         updateRoomHeaterCoolerStatus(building);
 
         buildingRepo.save(building);
-        return room;
+        return saved;
+    }
+
+    @Override
+    public List<Apartment> getApartments(Long buildingId) {
+        return getBuilding(buildingId).getApartments();
+    }
+
+    @Override
+    public List<CommonRoom> getCommonRooms(Long buildingId) {
+        return getBuilding(buildingId).getCommonRooms();
+    }
+
+    @Override
+    public Building removeApartment(Long buildingId, Long aptId) {
+        Building b = getBuilding(buildingId);
+        b.getApartments().removeIf(a -> a.getId().equals(aptId));
+        return buildingRepo.save(b);
+    }
+
+    @Override
+    public Building removeCommonRoom(Long buildingId, Long roomId) {
+        Building b = getBuilding(buildingId);
+        b.getCommonRooms().removeIf(cr -> cr.getId().equals(roomId));
+        return buildingRepo.save(b);
     }
 
     @Override
