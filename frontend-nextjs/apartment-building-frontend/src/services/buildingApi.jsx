@@ -3,10 +3,15 @@ const BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8080/api/buil
 
 /*  data initialization in case of volatile db  */
 
-// export async function initBuilding() {
-//     const res = await axios.post(`${BASE}/initialize`);
-//     return res.data;
-// }
+export async function initBuilding() {
+    const res = await axios.post(`${BASE}/initialize`);
+    return res.data;
+}
+
+export async function initSampleBuildings(sampleData) {
+    const res = await axios.post(`${BASE}/initialize-sample`, sampleData);
+    return res.data;
+}
 
 export async function getBuildings() {
     const res = await axios.get(`${BASE}`);

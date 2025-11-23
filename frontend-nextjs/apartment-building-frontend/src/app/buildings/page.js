@@ -1,29 +1,41 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { getBuildings } from '../../services/buildingApi';
-import BuildingCard from '../../components/BuildingCard';
+import Link from 'next/link';
+import { getBuildings } from '@/services/buildingApi';
+import EntityCard from '@/components/EntityCard';
+import { pick, buildingImages } from '@/utils/randomImages';
 
 export default function BuildingsPage() {
-  const [buildings, setBuildings] = useState([]);
+  const [list, setList] = useState([]);
+  const [imagesMap, setImagesMap] = useState({});
 
-  useEffect(() => {
-    fetchBuildings();
-  }, []);
+  useEffect(() => { fetchAll(); }, []);
 
-  async function fetchBuildings() {
-    try {
-      const res = await getBuildings();
-      console.log(res)
-      setBuildings(res || []);
-    } catch (e) { console.error(e); }
+  async function fetchAll() {
+    const res = await getBuildings();
+    setList(res || []);
+
+    // assign stable images for new buildings
+    const newMap = {};
+    (res || []).forEach(b => {
+      if (!imagesMap[b.id]) {
+        newMap[b.id] = pick(buildingImages);
+      }
+    });
+    setImagesMap(prev => ({ ...prev, ...newMap }));
   }
 
   return (
-    <div className="p-grid">
-      {buildings.length === 0 && <p>No buildings yet. Click init on backend to create one.</p>}
-      {buildings.map(b => (
-        <div key={b.id} className="p-col-12 p-md-6 p-lg-4">
-          <BuildingCard building={b} />
+    <div className="grid h-auto">
+      {list.map(b => (
+        <div key={b.id} className="col-12 md:col-6 lg:col-4">
+          <Link href={`/buildings/${b.id}`}>
+            <EntityCard
+              type="building"
+              data={b}
+              image={imagesMap[b.id]} // stable image
+            />
+          </Link>
         </div>
       ))}
     </div>
