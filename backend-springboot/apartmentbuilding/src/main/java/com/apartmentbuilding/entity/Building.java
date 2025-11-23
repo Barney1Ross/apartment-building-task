@@ -19,9 +19,9 @@ public class Building {
 
     private double requestedTemperature = 20.0;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Apartment> apartments = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<CommonRoom> commonRooms = new ArrayList<>();
 }

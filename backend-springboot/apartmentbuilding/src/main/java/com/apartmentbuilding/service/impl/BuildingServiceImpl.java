@@ -1,9 +1,11 @@
 package com.apartmentbuilding.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.apartmentbuilding.dto.BuildingRequestDTO;
 import com.apartmentbuilding.entity.Apartment;
 import com.apartmentbuilding.entity.Building;
 import com.apartmentbuilding.entity.CommonRoom;
@@ -12,6 +14,7 @@ import com.apartmentbuilding.repository.BuildingRepository;
 import com.apartmentbuilding.repository.CommonRoomRepository;
 import com.apartmentbuilding.service.BuildingService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -68,6 +71,44 @@ public class BuildingServiceImpl implements BuildingService {
         return buildingRepo.save(building);
     }
 
+
+    @Override
+    @Transactional
+    public List<Building> initializeSampleBuildings(List<BuildingRequestDTO> requests) {
+        List<Building> savedBuildings = new ArrayList<>();
+
+        for (BuildingRequestDTO req : requests) {
+            Building building = new Building();
+            building.setRequestedTemperature(req.getRequestedTemperature());
+
+            // Apartments
+            for (BuildingRequestDTO.ApartmentRequest aptReq : req.getApartments()) {
+                Apartment apt = new Apartment();
+                apt.setOwnerName(aptReq.getOwnerName());
+                apt.setApartmentNumber(aptReq.getApartmentNumber());
+                apt.setCurrentTemperature(aptReq.getCurrentTemperature());
+                apartmentRepo.save(apt);
+                building.getApartments().add(apt);
+            }
+
+            // Common rooms
+            for (BuildingRequestDTO.CommonRoomRequest crReq : req.getCommonRooms()) {
+                CommonRoom cr = new CommonRoom();
+                cr.setType(CommonRoom.CommonRoomType.valueOf(crReq.getType()));
+                cr.setCurrentTemperature(crReq.getCurrentTemperature());
+                commonRoomRepo.save(cr);
+                building.getCommonRooms().add(cr);
+            }
+
+            updateRoomHeaterCoolerStatus(building);
+
+            savedBuildings.add(buildingRepo.save(building));
+        }
+
+        return savedBuildings;
+    }
+
+    
     @Override
     public Building updateRequestedTemperature(Long id, double newTemp) {
         Building building = getBuilding(id);

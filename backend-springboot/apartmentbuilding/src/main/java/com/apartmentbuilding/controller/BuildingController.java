@@ -2,6 +2,7 @@ package com.apartmentbuilding.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.apartmentbuilding.dto.BuildingRequestDTO;
 import com.apartmentbuilding.entity.Apartment;
 import com.apartmentbuilding.entity.Building;
 import com.apartmentbuilding.entity.CommonRoom;
@@ -34,6 +36,12 @@ public class BuildingController {
         return buildingService.initializeDefaultBuilding();
     }
 
+    @PostMapping("/initialize-sample")
+    public ResponseEntity<List<Building>> initializeSample(@RequestBody List<BuildingRequestDTO> requests) {
+        List<Building> buildings = buildingService.initializeSampleBuildings(requests);
+        return ResponseEntity.ok(buildings);
+    }
+    
     // Get all buildings
     @GetMapping
     public List<Building> getAll() {
